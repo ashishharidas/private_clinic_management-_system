@@ -49,16 +49,42 @@
 - Token number generation per doctor per day
 - Cancellation (frees the slot back up)
 - Appointment history + upcoming appointments endpoints
+- **Admin routes** (`routes/admin.js`, protected by `ensureAdmin` middleware) —
+  create/edit/deactivate doctors, list users, link a Google account to a doctor
+- **Daily cron job** (`/api/cron/generate-slots`, protected by `CRON_SECRET`)
+  — keeps the 7-day slot window rolling forward automatically via Vercel Cron
+- **Validation & error handling polish**:
+  - Reject booking a slot in the past (defensive check in `/book`)
+  - Reject duplicate/overlapping bookings (same doctor + same date + overlapping time)
+  - Clean 400 errors with messages on admin doctor creation/update
+  - Global Express error handler (logs server-side, generic 500 to client)
+  - Frontend: every API call site has a `.catch` showing a user-facing message
 
-## What's NOT built yet (next steps, in order)
+## Admin panel
 
-1. **React frontend** — login button, doctor list, slot picker, "my appointments" page
-2. **Doctor dashboard** — separate login type, view today's token queue, mark
-   completed, add consultation notes
-3. **Admin routes** — add/edit doctors through the UI instead of Compass
-4. **Daily cron job** to run `generateSlots.js` automatically every day (so the
-   7-day window keeps rolling forward) — can use `node-cron` package
-5. **Validation & error handling polish** — e.g. reject booking a slot in the past
+The first admin account must be set by hand once — there's no way around
+bootstrapping the first admin. After that, the admin panel at `/admin` lets
+you manage everything through the UI:
+
+- Create a new doctor (name, specialization, clinicName, working hours)
+- Edit a doctor's details or working hours
+- Deactivate a doctor (preserves appointment history — no hard delete)
+- Link a Google-logged-in user to a doctor by email
+  (replaces the old manual MongoDB edit)
+
+## Daily cron job
+
+Slot generation is automated via Vercel Cron. Add a `crons` array to
+`backend/vercel.json`:
+
+```json
+"crons": [
+  { "path": "/api/cron/generate-slots", "schedule": "0 2 * * *" }
+]
+```
+
+Set `CRON_SECRET` in the Vercel dashboard and the route will reject requests
+that don't send it as a `x-cron-secret` header or `?secret=` query param.
 
 ## Key concept to understand before moving on
 

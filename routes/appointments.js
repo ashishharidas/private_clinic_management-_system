@@ -10,39 +10,75 @@ router.post("/book", ensureAuthenticated, async (req, res) => {
   const patientId = req.user._id;
 
   try {
-    // THE ATOMIC STEP: find a slot that is still "available" and flip it to
+    // 1. Fetch slot info for validation (non-atomic read)
+    const slot = await Slot.findById(slotId);
+    if (!slot) {
+      return res.status(404).json({ message: "Slot not found" });
+    }
+
+    // 2. Defensive check: reject past slots
+    const slotDateTime = new Date(`${slot.date}T${slot.startTime}:00`);
+    if (slotDateTime < new Date()) {
+      return res.status(400).json({ message: "Cannot book a slot in the past." });
+    }
+
+    // 3. Check for conflicting booking (same doctor, same date, overlapping time)
+    const conflict = await Appointment.findOne({
+      patient: patientId,
+      doctor: slot.doctor,
+      date: slot.date,
+      status: "booked",
+      $or: [
+        // Exact same start time = duplicate booking
+        { startTime: slot.startTime },
+        // Time range overlap: existing appointment overlaps with this slot
+        {
+          startTime: { $lt: slot.endTime },
+          endTime: { $gt: slot.startTime },
+        },
+      ],
+    });
+
+    if (conflict) {
+      return res.status(409).json({
+        message: "You already have an appointment with this doctor at this time.",
+      });
+    }
+
+    // 4. THE ATOMIC STEP: find a slot that is still "available" and flip it to
     // "booked" in ONE database operation. If two requests race for the same
     // slot, only the first one finds status:"available" — the second gets null.
-    const slot = await Slot.findOneAndUpdate(
+    const bookedSlot = await Slot.findOneAndUpdate(
       { _id: slotId, status: "available" },
       { status: "booked" },
       { new: true }
     );
 
-    if (!slot) {
+    if (!bookedSlot) {
       return res.status(409).json({ message: "Sorry, this slot was just booked by someone else." });
     }
 
     // Work out today's token number for this doctor (count existing bookings that day + 1)
     const bookingsToday = await Appointment.countDocuments({
-      doctor: slot.doctor,
-      date: slot.date,
+      doctor: bookedSlot.doctor,
+      date: bookedSlot.date,
       status: { $ne: "cancelled" },
     });
     const tokenNumber = bookingsToday + 1;
 
     const appointment = await Appointment.create({
       patient: patientId,
-      doctor: slot.doctor,
-      slot: slot._id,
+      doctor: bookedSlot.doctor,
+      slot: bookedSlot._id,
       tokenNumber,
-      date: slot.date,
-      startTime: slot.startTime,
+      date: bookedSlot.date,
+      startTime: bookedSlot.startTime,
+      endTime: bookedSlot.endTime, // store for overlap detection
       status: "booked",
     });
 
-    slot.appointment = appointment._id;
-    await slot.save();
+    bookedSlot.appointment = appointment._id;
+    await bookedSlot.save();
 
     res.status(201).json({ appointment, tokenNumber });
   } catch (err) {

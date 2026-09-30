@@ -7,7 +7,8 @@ const appointmentSchema = new mongoose.Schema(
     slot: { type: mongoose.Schema.Types.ObjectId, ref: "Slot", required: true },
     tokenNumber: { type: Number, required: true }, // e.g. Token #5 for that doctor that day
     date: { type: String, required: true },
-    startTime: { type: String, required: true },
+    startTime: { type: String, required: true }, // "10:00"
+    endTime: { type: String }, // "10:30" — used for overlap detection
     status: {
       type: String,
       enum: ["booked", "completed", "cancelled", "no-show"],
