@@ -7,6 +7,7 @@ export default function MyAppointments() {
   const [upcoming, setUpcoming] = useState([]);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [cancellingId, setCancellingId] = useState(null);
 
   useEffect(() => {
@@ -15,11 +16,13 @@ export default function MyAppointments() {
 
   function loadAll() {
     setLoading(true);
+    setError("");
     Promise.all([api.get("/appointments/upcoming"), api.get("/appointments/history")])
       .then(([up, hist]) => {
         setUpcoming(up.data);
         setHistory(hist.data);
       })
+      .catch(() => setError("Couldn't load appointments right now."))
       .finally(() => setLoading(false));
   }
 
@@ -45,6 +48,8 @@ export default function MyAppointments() {
       <Navbar />
       <div className="container" style={{ paddingTop: 36, paddingBottom: 60 }}>
         <h1>My appointments</h1>
+
+        {error && <p style={{ color: "var(--color-danger)" }}>{error}</p>}
 
         <div style={styles.tabs}>
           <button

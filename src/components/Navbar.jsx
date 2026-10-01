@@ -21,6 +21,8 @@ export default function Navbar() {
         <nav style={styles.nav}>
           <Link to="/dashboard" style={styles.link}>Book a visit</Link>
           <Link to="/appointments" style={styles.link}>My appointments</Link>
+          {user.role === "admin" && <Link to="/admin" style={styles.link}>Admin panel</Link>}
+          {user.role === "doctor" && <Link to="/doctor" style={styles.link}>Doctor dashboard</Link>}
         </nav>
         <div style={styles.userArea}>
           {user.photo && <img src={user.photo} alt="" style={styles.avatar} />}
