@@ -51,14 +51,39 @@
 - Appointment history + upcoming appointments endpoints
 - **Admin routes** (`routes/admin.js`, protected by `ensureAdmin` middleware) —
   create/edit/deactivate doctors, list users, link a Google account to a doctor
+- **Doctor dashboard routes** (`routes/doctor.js`, protected by `ensureDoctor` middleware) —
+  view today's queue, mark complete with notes, mark no-show, patient history
 - **Daily cron job** (`/api/cron/generate-slots`, protected by `CRON_SECRET`)
-  — keeps the 7-day slot window rolling forward automatically via Vercel Cron
-- **Validation & error handling polish**:
-  - Reject booking a slot in the past (defensive check in `/book`)
-  - Reject duplicate/overlapping bookings (same doctor + same date + overlapping time)
-  - Clean 400 errors with messages on admin doctor creation/update
-  - Global Express error handler (logs server-side, generic 500 to client)
-  - Frontend: every API call site has a `.catch` showing a user-facing message
+  — call via cron-job.org or Render Cron to keep the 7-day slot window rolling
+
+## Admin panel
+
+The first admin account must be set by hand once — there's no way around
+bootstrapping the first admin. After that, the admin panel at `/admin` lets
+you manage everything through the UI:
+
+- Create a new doctor (name, specialization, clinicName, working hours)
+- Edit a doctor's details or working hours
+- Deactivate a doctor (preserves appointment history — no hard delete)
+- Link a Google-logged-in user to a doctor by email
+  (replaces the old manual MongoDB edit)
+
+## Daily cron job (Render / cron-job.org)
+
+Since the backend runs on Render, use a cron service to hit the endpoint daily:
+
+**Option A: cron-job.org (free, reliable)**
+1. Create a free account at https://cron-job.org
+2. Create a job: URL = `https://your-backend.onrender.com/api/cron/generate-slots?secret=<YOUR_CRON_SECRET>`
+3. Schedule: daily at 2am (or preferred time)
+4. Method: GET, add `x-cron-secret` header if you prefer header over query param
+
+**Option B: Render Cron (paid plan)**
+1. In Render dashboard → your service → Cron Jobs → Add
+2. Schedule: `0 2 * * *`
+3. Command: `curl "https://your-backend.onrender.com/api/cron/generate-slots?secret=$CRON_SECRET"`
+
+Set `CRON_SECRET` in Render environment variables.
 
 ## Admin panel
 

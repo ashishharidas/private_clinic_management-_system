@@ -19,11 +19,12 @@ const doctorSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     specialization: { type: String, required: true },
-    clinicName: { type: String, required: true },
+    clinicName: { type: String }, // required during creation, can be empty; editable later
     workingHours: [workingHourSchema],
     slotDurationMinutes: { type: Number, default: 30 },
     onLeaveDates: [{ type: Date }], // days doctor has blocked off
     isActive: { type: Boolean, default: true },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // link to User account
   },
   { timestamps: true }
 );

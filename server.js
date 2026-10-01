@@ -7,10 +7,11 @@ const passport = require("./config/passport");
 const connectDB = require("./config/db");
 
 const authRoutes = require("./routes/auth");
-const doctorRoutes = require("./routes/doctors");
+const doctorsRoutes = require("./routes/doctors");
 const appointmentRoutes = require("./routes/appointments");
 const adminRoutes = require("./routes/admin");
 const cronRoutes = require("./routes/cron");
+const doctorRoutes = require("./routes/doctor");
 
 const app = express();
 
@@ -40,10 +41,11 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use("/api/auth", authRoutes);
-app.use("/api/doctors", doctorRoutes);
+app.use("/api/doctors", doctorsRoutes);
 app.use("/api/appointments", appointmentRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/cron", cronRoutes);
+app.use("/api/doctor", doctorRoutes);
 
 app.get("/", (req, res) => res.send("Clinic API is running"));
 app.get("/api/health", (req, res) => res.json({ status: "ok" }));
