@@ -1,6 +1,9 @@
 import { useAuth } from "../context/AuthContext";
 import { Navigate } from "react-router-dom";
 
+const API_BASE =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+
 export default function Login() {
   const { user, loading } = useAuth();
 
@@ -8,10 +11,11 @@ export default function Login() {
   if (user) return <Navigate to="/dashboard" replace />;
 
   function handleGoogleLogin() {
-    // Real browser redirect — not a fetch call. This hands off to Google's
-    // login page, and Google redirects back to our backend callback URL.
-    window.location.href = "http://localhost:5000/api/auth/google";
+    // Real browser redirect, not a fetch call. Uses the same base URL as api.js.
+    window.location.href = `${API_BASE}/auth/google`;
   }
+
+  // ...rest of the component unchanged
 
   return (
     <div style={styles.wrap}>
