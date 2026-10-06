@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import api from "../api/client";
-import Navbar from "../components/Navbar";
 
 export default function MyAppointments() {
   const [tab, setTab] = useState("upcoming"); // "upcoming" | "history"
@@ -45,7 +44,6 @@ export default function MyAppointments() {
 
   return (
     <div>
-      <Navbar />
       <div className="container" style={{ paddingTop: 36, paddingBottom: 60 }}>
         <h1>My appointments</h1>
 

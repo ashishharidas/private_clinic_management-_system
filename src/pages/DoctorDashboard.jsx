@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/client";
-import Navbar from "../components/Navbar";
+import Modal from "../components/primitives/Modal";
 
 export default function DoctorDashboard() {
   const navigate = useNavigate();
@@ -11,6 +11,10 @@ export default function DoctorDashboard() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(null);
   const [processingId, setProcessingId] = useState(null);
+
+  // Complete visit modal state
+  const [completeAppt, setCompleteAppt] = useState(null);
+  const [completeForm, setCompleteForm] = useState({ notes: "", prescription: "" });
 
   useEffect(() => {
     loadQueue();
@@ -36,21 +40,19 @@ export default function DoctorDashboard() {
     }
   }
 
-  async function handleComplete(appt) {
-    if (!appt.patient) return;
-    const notes = window.prompt(`Consultation notes for ${appt.patient.name}:`);
-    if (notes === null) return; // user cancelled
+  async function handleCompleteSubmit() {
+    if (!completeAppt) return;
 
-    const prescription = window.prompt("Prescription (optional):");
-
-    setProcessingId(appt._id);
+    setProcessingId(completeAppt._id);
     setMessage(null);
     try {
-      await api.patch(`/doctor/appointments/${appt._id}/complete`, {
-        consultationNotes: notes || "",
-        prescription: prescription || "",
+      await api.patch(`/doctor/appointments/${completeAppt._id}/complete`, {
+        consultationNotes: completeForm.notes || "",
+        prescription: completeForm.prescription || "",
       });
-      setMessage({ type: "success", text: `Visit completed for ${appt.patient.name}.` });
+      setMessage({ type: "success", text: `Visit completed for ${completeAppt.patient.name}.` });
+      setCompleteAppt(null);
+      setCompleteForm({ notes: "", prescription: "" });
       loadQueue();
     } catch (err) {
       setMessage({ type: "error", text: err.response?.data?.message || "Failed to complete visit." });
@@ -82,7 +84,6 @@ export default function DoctorDashboard() {
 
   return (
     <div>
-      <Navbar />
       <div className="container" style={{ paddingTop: 36, paddingBottom: 60 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
           <div>
@@ -111,6 +112,38 @@ export default function DoctorDashboard() {
             {message.text}
           </div>
         )}
+
+        {/* Complete Visit Modal */}
+        <Modal
+          open={!!completeAppt}
+          onClose={() => setCompleteAppt(null)}
+          title={`Complete visit: ${completeAppt?.patient?.name}`}
+          footer={
+            <div style={{ display: "flex", gap: 10 }}>
+              <button className="btn btn-outline" onClick={() => setCompleteAppt(null)} disabled={processingId === completeAppt?._id}>
+                Cancel
+              </button>
+              <button className="btn btn-primary" onClick={handleCompleteSubmit} disabled={processingId === completeAppt?._id}>
+                {processingId === completeAppt?._id ? "Completing..." : "Complete Visit"}
+              </button>
+            </div>
+          }
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <textarea
+              className="form-textarea"
+              placeholder="Consultation notes"
+              value={completeForm.notes}
+              onChange={(e) => setCompleteForm({ ...completeForm, notes: e.target.value })}
+            />
+            <textarea
+              className="form-textarea"
+              placeholder="Prescription (optional)"
+              value={completeForm.prescription}
+              onChange={(e) => setCompleteForm({ ...completeForm, prescription: e.target.value })}
+            />
+          </div>
+        </Modal>
 
         {loading && <div className="spinner" style={{ marginTop: 24 }} />}
 
@@ -153,9 +186,9 @@ export default function DoctorDashboard() {
                       <button
                         className="btn btn-primary"
                         disabled={processingId === appt._id}
-                        onClick={() => handleComplete(appt)}
+                        onClick={() => setCompleteAppt(appt)}
                       >
-                        {processingId === appt._id ? "Completing…" : "Complete Visit"}
+                        Complete Visit
                       </button>
                       <button
                         className="btn btn-danger"

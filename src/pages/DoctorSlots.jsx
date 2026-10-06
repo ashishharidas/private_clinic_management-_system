@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/client";
-import Navbar from "../components/Navbar";
 
 export default function DoctorSlots() {
   const { doctorId } = useParams();
@@ -60,7 +59,6 @@ export default function DoctorSlots() {
 
   return (
     <div>
-      <Navbar />
       <div className="container" style={{ paddingTop: 36, paddingBottom: 60 }}>
         <button className="btn btn-outline" onClick={() => navigate("/dashboard")} style={{ marginBottom: 20 }}>
           ← Back to doctors

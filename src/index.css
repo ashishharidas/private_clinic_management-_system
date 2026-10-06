@@ -10,8 +10,8 @@
   --color-border: #E2DFD6;
   --color-danger: #B4432E;
   --color-danger-bg: #FBEAE6;
-  --color-success-bg: #E9F2E8;
   --color-success: #3C6E3F;
+  --color-success-bg: #E9F2E8;
 
   /* Type */
   --font-display: "Fraunces", Georgia, serif;
@@ -20,6 +20,59 @@
   /* Layout */
   --radius: 10px;
   --max-width: 960px;
+}
+
+/* ==========================================================================
+   Per-role themes. Each layout injects `data-theme="patient|doctor|admin|staff"`
+   on a parent element. The tokens below override the patient defaults above.
+   ========================================================================== */
+
+/* ---- Doctor theme ---- */
+[data-theme="doctor"] {
+  --color-bg: #E8F4FD;
+  --color-surface: #FFFFFF;
+  --color-ink: #1A237E;
+  --color-ink-soft: #5C6BC0;
+  --color-primary: #1A237E;
+  --color-primary-dark: #0D1B2A;
+  --color-accent: #0288D1;
+  --color-border: #90CAF9;
+  --color-danger: #EF5350;
+  --color-danger-bg: #FFCDD2;
+  --color-success: #43A047;
+  --color-success-bg: #C8E6C9;
+}
+
+/* ---- Admin theme ---- */
+[data-theme="admin"] {
+  --color-bg: #F3E5F5;
+  --color-surface: #FFFFFF;
+  --color-ink: #4A148C;
+  --color-ink-soft: #AB47BC;
+  --color-primary: #7B1FA2;
+  --color-primary-dark: #4A148C;
+  --color-accent: #CE93D8;
+  --color-border: #E1BEE7;
+  --color-danger: #E53935;
+  --color-danger-bg: #F8D7DA;
+  --color-success: #66BB6A;
+  --color-success-bg: #C8E6C9;
+}
+
+/* ---- Staff theme ---- */
+[data-theme="staff"] {
+  --color-bg: #FFF3E0;
+  --color-surface: #FFFFFF;
+  --color-ink: #E65100;
+  --color-ink-soft: #FF8A65;
+  --color-primary: #FB8C00;
+  --color-primary-dark: #F57C00;
+  --color-accent: #FFB74D;
+  --color-border: #FFE0B2;
+  --color-danger: #EF9A9A;
+  --color-danger-bg: #FFCDD2;
+  --color-success: #A5D6A7;
+  --color-success-bg: #C8E6C9;
 }
 
 * {

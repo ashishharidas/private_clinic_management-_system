@@ -1,119 +1,195 @@
-# Clinic Patient Management — Frontend
+# Clinic Patient Management System - Frontend
+
+## Overview
+React frontend for the clinic patient management system with role-based portals and distinct visual themes for each user type.
+
+## Features
+- **Four distinct portals**: Patient, Doctor, Admin, Staff
+- **Role-based theming**: Each portal has its own color theme via CSS variables
+- **Shared primitives**: Reusable UI components (Button, Input, Card, etc.) that adapt to the current theme
+- **Role-based routing**: Automatic redirects based on user role and permissions
+- **Theme switching**: Layout shells inject `data-theme` attribute for automatic CSS variable switching
+- **Protected routes**: Authentication and authorization guards
+- **Responsive design**: Works on mobile and desktop
+- **Loading states**: Skeletons and spinners for better UX
+- **Form validation**: Client-side validation with helpful error messages
+- **Toast notifications**: Feedback for user actions
+- **Modal dialogs**: For confirmations and forms
+- **Public browsing**: Doctor search and detail pages accessible without login
+
+## Portals & Themes
+
+### Patient Portal (`data-theme="patient"`)
+- Soft, calming teal-green theme
+- Focus: Browse doctors, book appointments, manage profile
+- Access: `/dashboard`, `/doctors/:id`, `/appointments`, `/profile`
+
+### Doctor Portal (`data-theme="doctor"`)
+- Professional blue theme
+- Focus: Manage appointment queue, complete visits, view patient history
+- Access: `/doctor` (dashboard), plus direct links from navbar
+
+### Admin Portal (`data-theme="admin"`)
+- Regal purple theme
+- Focus: Manage doctors, users, staff, view audit logs, system stats
+- Access: `/admin`
+
+### Staff Portal (`data-theme="staff"`)
+- Warm orange theme
+- Focus: View-only access to appointments, statistics, recent activity
+- Access: `/staff`
+
+## UI Components
+
+### Layout Shells
+Each portal uses a layout shell that:
+- Sets the theme via `data-theme` on `<body>`
+- Includes the Navbar
+- Provides a content container with consistent spacing
+- Located in `src/layouts/`
+
+### Shared Primitives
+All components in `src/components/primitives/`:
+- **Button** - Primary, secondary, outline, danger variants with loading states
+- **Input** - Text, email, password, textarea with label/help/error states
+- **Card** - Container with header/body/footer
+- **Badge** - Status indicators (booked, completed, cancelled, etc.)
+- **Modal** - Dialog with overlay, header, body, footer
+- **Toast** - Non-blocking notifications (top-center)
+- **Table** - Data display with sorting, pagination, loading states
+- **Spinner** - Loading indicator
+- **Skeleton** - Placeholder shapes for loading content
+
+### Navigation
+- **Navbar** - Shows/hides links based on user role
+  - Not logged in: Find Doctors, Log in
+  - Patient: Book visit, My appointments, My profile, Find Doctors (link), Log out
+  - Doctor: Book visit, My appointments, Doctor dashboard, Log out
+  - Admin: Book visit, My appointments, Admin panel, Staff panel, Log out
+  - Staff: Book visit, My appointments, Staff panel, Log out
+  - Manager: Same as Staff (inherits staff theme)
+
+## API Integration
+- Uses axios instance in `src/api/client.js`
+- Automatically sends cookies with requests (`withCredentials: true`)
+- Base URL from `VITE_API_BASE_URL` env var (defaults to localhost:5000)
+- Response interceptors could be added for global error handling
+
+## Environment Variables
+Create `.env` in the frontend directory:
+```
+VITE_API_BASE_URL=http://localhost:5000/api
+```
+
+## Design System
+See `src/DESIGN.md` for complete design documentation including:
+- Color tokens per theme
+- Layout shell specifications
+- Component usage guidelines
+- Role-based permission matrix
+- Migration notes
 
 ## Setup
 
 1. Install dependencies:
-   ```
+   ```bash
    npm install
    ```
-2. Make sure your backend is running on Render (see deployment notes below).
-3. Start the frontend:
+
+2. Create `.env` file:
+   ```bash
+   echo "VITE_API_BASE_URL=http://localhost:5000/api" > .env
    ```
+
+3. Start the development server:
+   ```bash
    npm run dev
    ```
-4. Open http://localhost:5173 — you should see the login screen.
 
-## Environment variables
+4. Build for production:
+   ```bash
+   npm run build
+   ```
 
-The frontend reads `VITE_API_BASE_URL` to determine the backend URL:
+5. Preview production build:
+   ```bash
+   npm run preview
+   ```
 
-- **Local development**: defaults to `http://localhost:5000/api`
-- **Vercel deployment**: set `VITE_API_BASE_URL` to your Render backend URL
-  (e.g. `https://clinic-backend-xyz.onrender.com/api`) in the Vercel dashboard.
+## Deployment
 
-## How the pieces fit together
+### Frontend (Vercel)
+1. Push to GitHub/GitLab/Bitbucket
+2. Import project in Vercel
+3. Set environment variable:
+   - `VITE_API_BASE_URL` = your backend URL (e.g., `https://your-backend.onrender.com/api`)
+4. Vercel will automatically detect it's a Vite project and build/deploy
 
-- **`context/AuthContext.jsx`** — on every page load, calls `GET /api/auth/me` to
-  check "is anyone logged in?" via the session cookie. Every page reads from
-  this instead of re-checking auth itself.
-- **`components/ProtectedRoute.jsx`** — wraps pages that require login; bounces
-  to `/login` if `user` is null. Also checks `user.role` (must match or redirect).
-- **`pages/Login.jsx`** — the Google button does a real `window.location.href`
-  redirect (not `fetch`), because OAuth needs a full page navigation to Google
-  and back.
-- **`pages/Dashboard.jsx`** — lists doctors from `GET /api/doctors`.
-- **`pages/DoctorSlots.jsx** — the booking screen. Watch how it handles a
-  `409` response from the backend: that's the "someone else booked this slot
-  first" race-condition case you already built server-side. The UI just shows
-  a message and refreshes the list — nothing breaks.
-- **`pages/MyAppointments.jsx`** — tabs between upcoming and history, using
-  your `/upcoming` and `/history` endpoints; cancel button calls the cancel
-  route and reloads.
-- **`pages/AdminDashboard.jsx`** — admin panel at `/admin` (visible only when
-  `user.role === "admin"`): create/edit/deactivate doctors, link Google accounts.
-- **`pages/DoctorDashboard.jsx`** — doctor dashboard at `/doctor` (visible only
-  when `user.role === "doctor"`): view today's queue, mark visits complete with
-  notes, mark no-show, view patient history.
+### Backend (Render)
+See backend README for deployment instructions.
 
-## Deployment: Vercel Frontend + Render Backend
+## Development Notes
 
-### 1. Backend on Render
+### Theme Implementation
+- Each layout shell (PatientShell, DoctorShell, etc.) sets `data-theme` on `<body>`
+- CSS in `src/index.css` defines `:root` (patient defaults) and `[data-theme="X"]` overrides
+- Shared primitives use `var(--color-name)` to reference theme-specific colors
+- No need to pass theme props down - components automatically use current theme
 
-Set these environment variables in your Render dashboard:
+### Authentication Flow
+- `AuthContext` checks `/auth/me` on app load
+- Sets user object and triggers theme update
+- Protected routes redirect to `/login` if not authenticated
+- If `user.mustChangePassword === true`, redirects to `/change-password`
+- On logout, removes user and clears theme
 
-```
-MONGO_URI=mongodb+srv://<your-atlas-uri>
-SESSION_SECRET=<random-hex>
-GOOGLE_CLIENT_ID=<your-client-id>
-GOOGLE_CLIENT_SECRET=<your-rotated-secret>
-GOOGLE_CALLBACK_URL=https://<your-render-url>/api/auth/google/callback
-CLIENT_URL=https://<your-vercel-url>.vercel.app
-NODE_ENV=production
-CRON_SECRET=<random-string>
-```
+### Data Fetching
+- Components use `useEffect` to load data on mount/param changes
+- Loading states shown with spinners or skeletons
+- Error states display user-friendly messages
+- Success states show toast notifications
 
-### 2. Frontend on Vercel
+### Form Handling
+- Controlled components with useState
+- Client-side validation (required fields, min lengths, etc.)
+- Form submission handled via async/await with try/catch
+- Disabled submit buttons during loading states
 
-Set this environment variable in your Vercel dashboard:
+## Component Library Guidelines
 
-```
-VITE_API_BASE_URL=https://<your-render-url>.onrender.com/api
-```
+### Naming
+- Components are PascalCase
+- Props are camelCase
+- Event handlers start with `handle` or `on`
 
-The `GOOGLE_CALLBACK_URL` must match the Google Cloud Console Authorized
-redirect URI exactly.
+### Styling
+- Use CSS variables from `:root` or `[data-theme]`
+- Avoid hardcoded colors
+- Use semantic class names (btn-primary, card, etc.)
+- Keep components reusable and theme-agnostic
 
-### 3. Cron job for slot generation
+### Accessibility
+- Proper labels for form inputs
+- Keyboard navigation support
+- ARIA attributes where needed
+- Sufficient color contrast (verified per theme)
 
-Since the backend runs on Render (not Vercel), use one of these options:
+## Testing
+Manual testing recommended:
+1. Test each portal login (Google for patients, local for others)
+2. Verify role-based redirects work correctly
+3. Check that each portal shows correct theme
+4. Test form validation and submission
+5. Verify public routes work without login
+6. Test toast notifications and modals
+7. Check loading and error states
 
-**Option A: cron-job.org (free)**
-1. Create a free account at https://cron-job.org
-2. Create a job: URL = `https://your-backend.onrender.com/api/cron/generate-slots?secret=<CRON_SECRET>`
-3. Schedule: daily at 2am
-4. Set `CRON_SECRET` in Render environment variables
+## Contributing
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Ensure UI works in all four themes
+5. Submit a pull request
 
-**Option B: Render Cron (requires paid plan)**
-1. In Render dashboard → your service → Cron Jobs → Add
-2. Schedule: `0 2 * * *`
-3. Command: `curl "$CRON_SECRET" && curl "https://your-backend.onrender.com/api/cron/generate-slots?secret=$CRON_SECRET"`
-
-### 4. Testing locally
-
-Copy `.env.example` to `.env` in both frontend and backend, fill in dev values:
-
-```
-# Backend .env
-MONGO_URI=mongodb+srv://<your-atlas-uri>
-SESSION_SECRET=<random-hex>
-GOOGLE_CLIENT_ID=<your-client-id>
-GOOGLE_CLIENT_SECRET=<your-secret>
-GOOGLE_CALLBACK_URL=http://localhost:5000/api/auth/google/callback
-CLIENT_URL=http://localhost:5173
-CRON_SECRET=<random-string>
-NODE_ENV=development
-
-# Frontend .env (or leave VITE_API_BASE_URL unset for local default)
-VITE_API_BASE_URL=http://localhost:5000/api
-```
-
-## What's built
-
-- React 18 + Vite frontend
-- Google OAuth login flow
-- Doctor listing + slot booking with 409 race-condition handling
-- My Appointments (upcoming/history + cancel)
-- Admin panel (create/edit/deactivate doctors, link Google accounts by email)
-- **Doctor dashboard** (view queue, mark complete, mark no-show, patient history)
-- All API endpoints with validation and error handling polish
-- Global Express error handler (never leaks stack traces)
+## License
+MIT

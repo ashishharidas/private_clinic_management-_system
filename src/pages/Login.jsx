@@ -1,9 +1,6 @@
 import { useAuth } from "../context/AuthContext";
 import { Navigate } from "react-router-dom";
 
-const API_BASE =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
-
 export default function Login() {
   const { user, loading } = useAuth();
 
@@ -11,11 +8,9 @@ export default function Login() {
   if (user) return <Navigate to="/dashboard" replace />;
 
   function handleGoogleLogin() {
-    // Real browser redirect, not a fetch call. Uses the same base URL as api.js.
-    window.location.href = `${API_BASE}/auth/google`;
+    // Real browser redirect — not a fetch call. Uses the same base URL as api.js.
+    window.location.href = `/api/auth/google`;
   }
-
-  // ...rest of the component unchanged
 
   return (
     <div style={styles.wrap}>
@@ -26,6 +21,17 @@ export default function Login() {
           See real-time availability, hold a 30-minute slot, and keep every
           visit's history in one place.
         </p>
+        <div style={{ marginBottom: 24 }}>
+          <p style={{ fontSize: "0.9rem", color: "var(--color-ink-soft)", marginBottom: 8 }}>
+            Just browsing? No account needed.
+          </p>
+          <button
+            style={styles.secondaryBtn}
+            onClick={() => window.location.href = "/public/doctors/search"}
+          >
+            Find Doctors
+          </button>
+        </div>
         <button style={styles.googleBtn} onClick={handleGoogleLogin}>
           <GoogleIcon />
           Continue with Google
@@ -57,6 +63,10 @@ const styles = {
   card: {
     maxWidth: 440,
     textAlign: "left",
+    background: "var(--color-surface)",
+    padding: 32,
+    borderRadius: "var(--radius)",
+    border: "1px solid var(--color-border)",
   },
   eyebrow: {
     color: "var(--color-accent)",
@@ -67,9 +77,12 @@ const styles = {
   heading: {
     fontSize: "2.6rem",
     marginBottom: 16,
+    textAlign: "center",
   },
   sub: {
     fontSize: "1.05rem",
+    color: "var(--color-ink-soft)",
+    textAlign: "center",
     marginBottom: 32,
   },
   googleBtn: {
@@ -84,5 +97,22 @@ const styles = {
     fontWeight: 600,
     color: "var(--color-ink)",
     boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+  },
+  secondaryBtn: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    background: "transparent",
+    color: "var(--color-primary)",
+    border: "1.5px solid var(--color-border)",
+    borderRadius: "var(--radius)",
+    padding: "11px 20px",
+    fontSize: "0.95rem",
+    fontWeight: 600,
+    transition: "border-color 0.15s ease",
+  },
+  secondaryBtnHover: {
+    borderColor: "var(--color-primary)",
   },
 };
