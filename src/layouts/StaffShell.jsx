@@ -6,6 +6,7 @@ export default function StaffShell({ children }) {
 
   useEffect(() => {
     if (user?.role) document.body.setAttribute("data-theme", "staff");
+    return () => document.body.removeAttribute("data-theme");
   }, [user]);
 
   return (

@@ -6,6 +6,7 @@ export default function DoctorShell({ children }) {
 
   useEffect(() => {
     if (user?.role) document.body.setAttribute("data-theme", "doctor");
+    return () => document.body.removeAttribute("data-theme");
   }, [user]);
 
   return (

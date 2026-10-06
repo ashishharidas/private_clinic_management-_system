@@ -6,6 +6,7 @@ export default function PatientShell({ children }) {
 
   useEffect(() => {
     if (user?.role) document.body.setAttribute("data-theme", "patient");
+    return () => document.body.removeAttribute("data-theme");
   }, [user]);
 
   return (

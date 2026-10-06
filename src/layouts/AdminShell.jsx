@@ -6,6 +6,7 @@ export default function AdminShell({ children }) {
 
   useEffect(() => {
     if (user?.role) document.body.setAttribute("data-theme", "admin");
+    return () => document.body.removeAttribute("data-theme");
   }, [user]);
 
   return (
