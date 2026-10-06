@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const passport = require("../config/passport");
 const User = require("../models/User");
 const { ensureAuthenticated } = require("../middleware/auth");
+const { generateToken } = require("../utils/token");
 
 // NOTE: loginLimiter and passwordLimiter are already applied in server.js
 // (app.use("/api/auth/login", ...) and app.use("/api/auth/change-password", ...)),
@@ -23,7 +24,8 @@ router.get(
     // Force the session to save to the database BEFORE redirecting to avoid a race condition.
     req.session.save((err) => {
         if (err) console.error("Session save error:", err);
-        res.redirect(`${process.env.CLIENT_URL}/dashboard`);
+        const token = generateToken({ id: req.user._id });
+        res.redirect(`${process.env.CLIENT_URL}/dashboard?token=${token}`);
     });
   }
 );
@@ -84,7 +86,8 @@ router.post("/login", async (req, res) => {
       req.logIn(user, (err2) => {
         if (err2) return res.status(500).json({ message: "Login failed" });
         req.session.save(() => {
-          res.json({ user, needsChangePassword: user.mustChangePassword });
+          const token = generateToken({ id: user._id });
+          res.json({ user, token, needsChangePassword: user.mustChangePassword });
         });
       });
     });
