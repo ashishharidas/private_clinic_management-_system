@@ -5,7 +5,12 @@ export default function Login() {
   const { user, loading } = useAuth();
 
   if (loading) return null;
-  if (user) return <Navigate to="/dashboard" replace />;
+  if (user) {
+    if (user.role === "admin") return <Navigate to="/admin" replace />;
+    if (user.role === "doctor") return <Navigate to="/doctor/dashboard" replace />;
+    if (user.role === "staff" || user.role === "manager") return <Navigate to="/staff" replace />;
+    return <Navigate to="/dashboard" replace />;
+  }
 
   function handleGoogleLogin() {
     // Real browser redirect — not a fetch call. Uses the same base URL as api.js.
