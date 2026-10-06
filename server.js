@@ -38,7 +38,8 @@ const app = express();
 connectDB();
 
 // Trust the reverse proxy (Render, Nginx) so secure cookies work correctly
-app.set("trust proxy", 1);
+// Cloudflare + Render means 2 proxies. Trust array or true is safer.
+app.set("trust proxy", 2);
 
 // Helmet: HTTP security headers
 app.use(helmetConfig);
@@ -106,7 +107,10 @@ app.use("/api/public", publicRoutes);
 app.use("/api/staff", staffRoutes);
 
 app.get("/", (req, res) => res.send("Clinic API is running"));
-app.get("/api/health", (req, res) => res.json({ status: "ok" }));
+app.get("/api/health", (req, res) => {
+  req.session.ping = Date.now();
+  req.session.save(() => res.json({ status: "ok", sessionID: req.sessionID }));
+});
 
 // Global error handler — catches anything unhandled and returns a generic
 // 500 message. Never leak stack traces in production responses.
