@@ -44,7 +44,8 @@ app.set("trust proxy", 1);
 app.use(helmetConfig);
 
 // CORS: only allow the configured frontend, with credentials
-app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
+const clientUrl = process.env.CLIENT_URL.endsWith("/") ? process.env.CLIENT_URL.slice(0, -1) : process.env.CLIENT_URL;
+app.use(cors({ origin: clientUrl, credentials: true }));
 
 // JSON body parsing
 app.use(express.json({ limit: "1mb" }));
@@ -70,8 +71,8 @@ app.use(
     cookie: {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: true, // Always true for cross-origin HTTPS
+      sameSite: "none", // Must be none for cross-site (Render API <-> Vercel Frontend)
     },
   })
 );

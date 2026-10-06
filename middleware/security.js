@@ -7,9 +7,9 @@ const mongoSanitize = require("express-mongo-sanitize");
 // SPA built with Vite; the CSP would need to be tuned for that build.
 const csrfConfig = require("csurf")({
   cookie: {
-    secure: process.env.NODE_ENV === "production",
+    secure: true,
     httpOnly: true,
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    sameSite: "none",
   }
 });
 
