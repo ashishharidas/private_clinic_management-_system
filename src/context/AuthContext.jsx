@@ -8,6 +8,15 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check if URL has a session token from Google OAuth redirect
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+    if (token) {
+      localStorage.setItem("auth_token", token);
+      // Clean up the URL to hide the token from the address bar
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
     api
       .get("/auth/me")
       .then((res) => {
@@ -46,6 +55,7 @@ export function AuthProvider({ children }) {
     } finally {
       setUser(null);
       document.body.removeAttribute("data-theme");
+      localStorage.removeItem("auth_token");
     }
   }
 
