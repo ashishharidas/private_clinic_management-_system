@@ -5,7 +5,7 @@ function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
     // If the user must change their password, ONLY allow them access to /api/auth/change-password
     // Check if the current route is NOT the password change route
-    const isPasswordChangeRoute = req.originalUrl === "/api/auth/change-password" || req.originalUrl === "/api/auth/logout";
+    const isPasswordChangeRoute = req.originalUrl === "/api/auth/change-password" || req.originalUrl === "/api/auth/logout" || req.originalUrl.includes("/api/auth/me");
     
     if (req.user.mustChangePassword && !isPasswordChangeRoute) {
       return res.status(403).json({ 

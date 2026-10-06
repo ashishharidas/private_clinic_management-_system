@@ -20,8 +20,11 @@ router.get(
     failureRedirect: `${process.env.CLIENT_URL}/login-failed`,
   }),
   (req, res) => {
-    // Login succeeded — send them back to the React app
-    res.redirect(`${process.env.CLIENT_URL}/dashboard`);
+    // Force the session to save to the database BEFORE redirecting to avoid a race condition.
+    req.session.save((err) => {
+        if (err) console.error("Session save error:", err);
+        res.redirect(`${process.env.CLIENT_URL}/dashboard`);
+    });
   }
 );
 
@@ -80,7 +83,9 @@ router.post("/login", async (req, res) => {
       if (err) return res.status(500).json({ message: "Session regeneration failed" });
       req.logIn(user, (err2) => {
         if (err2) return res.status(500).json({ message: "Login failed" });
-        res.json({ user, needsChangePassword: user.mustChangePassword });
+        req.session.save(() => {
+          res.json({ user, needsChangePassword: user.mustChangePassword });
+        });
       });
     });
   } catch (err) {
