@@ -9,7 +9,7 @@ export default function Login() {
 
   function handleGoogleLogin() {
     // Real browser redirect — not a fetch call. Uses the same base URL as api.js.
-    window.location.href = `/api/auth/google`;
+    window.location.href = `${import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api"}/auth/google`;
   }
 
   return (
