@@ -20,6 +20,7 @@ const {
   loginLimiter,
   passwordLimiter,
   mongoSanitizeConfig,
+  csrfConfig,
 } = require("./middleware/security");
 
 const authRoutes = require("./routes/auth");
@@ -78,6 +79,19 @@ app.use(
 // Passport must come after session and before the routes
 app.use(passport.initialize());
 app.use(passport.session());
+
+// CSRF Protection requires session 
+app.use((req, res, next) => {
+  if (req.method === "GET" || req.method === "HEAD" || req.method === "OPTIONS") {
+    return next();
+  }
+  csrfConfig(req, res, next);
+});
+
+// Send CSRF token to frontend
+app.get("/api/csrf-token", (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+});
 
 // Route mounting
 app.use("/api/auth", authRoutes);

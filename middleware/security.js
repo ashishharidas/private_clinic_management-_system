@@ -5,6 +5,14 @@ const mongoSanitize = require("express-mongo-sanitize");
 // ---- Helmet: sets various HTTP security headers ----
 // We disable the default Content-Security-Policy because the app serves a
 // SPA built with Vite; the CSP would need to be tuned for that build.
+const csrfConfig = require("csurf")({
+  cookie: {
+    secure: process.env.NODE_ENV === "production",
+    httpOnly: true,
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  }
+});
+
 const helmetConfig = helmet({
   contentSecurityPolicy: false, // disabled — would need tuning for SPA build
   crossOriginResourcePolicy: { policy: "same-origin" },
@@ -60,23 +68,11 @@ const mongoSanitizeConfig = mongoSanitize({
 // The frontend must send it back as a header (X-CSRF-Token) on mutating requests.
 // Note: this only applies to state-changing requests (POST/PATCH/DELETE).
 // GET requests are safe from CSRF and don't need the token.
-function csrfProtection(req, res, next) {
-  const csurf = require("csurf");
-  return csurf({
-    cookie: {
-      // secure: true in production (matches session cookie)
-      secure: process.env.NODE_ENV === "production",
-      httpOnly: true,
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    },
-  })(req, res, next);
-}
-
 module.exports = {
   helmetConfig,
   apiLimiter,
   loginLimiter,
   passwordLimiter,
   mongoSanitizeConfig,
-  csrfProtection,
+  csrfConfig,
 };
