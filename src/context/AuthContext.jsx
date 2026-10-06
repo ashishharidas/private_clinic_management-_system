@@ -39,9 +39,14 @@ export function AuthProvider({ children }) {
   }
 
   async function logout() {
-    await api.post("/auth/logout");
-    setUser(null);
-    document.body.removeAttribute("data-theme");
+    try {
+      await api.post("/auth/logout");
+    } catch (err) {
+      console.error("Logout req failed", err);
+    } finally {
+      setUser(null);
+      document.body.removeAttribute("data-theme");
+    }
   }
 
   return (

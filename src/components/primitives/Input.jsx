@@ -33,13 +33,13 @@ export default function Input({
           type={type}
           className="form-input"
           style={{ paddingLeft: icon ? 36 : 12, paddingRight: 12 }}
-          aria-describedby={helperText ? "input-help" : undefined}
+          aria-describedby={helperText ? `${props.name || props.id}-help` : undefined}
           aria-invalid={hasError}
           {...props}
         />
       </div>
       {helperText && (
-        <p id="input-help" style={{ fontSize: "0.8rem", marginTop: 4, color: "var(--color-ink-soft)" }}>
+        <p id={`${props.name || props.id}-help`} style={{ fontSize: "0.8rem", marginTop: 4, color: "var(--color-ink-soft)" }}>
           {helperText}
         </p>
       )}

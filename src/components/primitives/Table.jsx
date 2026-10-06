@@ -22,7 +22,7 @@ export default function Table({ columns, data, loading, error, emptyMessage = "N
     );
   }
 
-  if (data.length === 0) {
+  if (!data || data.length === 0) {
     return (
       <div className="empty-state">
         <div className="empty-state-icon">📋</div>
