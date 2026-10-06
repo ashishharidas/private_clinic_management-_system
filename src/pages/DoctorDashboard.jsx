@@ -116,7 +116,7 @@ export default function DoctorDashboard() {
         {/* Complete Visit Modal */}
         <Modal
           open={!!completeAppt}
-          onClose={() => setCompleteAppt(null)}
+          onClose={() => { setCompleteAppt(null); setCompleteForm({ notes: "", prescription: "" }); }}
           title={`Complete visit: ${completeAppt?.patient?.name}`}
           footer={
             <div style={{ display: "flex", gap: 10 }}>
@@ -186,7 +186,7 @@ export default function DoctorDashboard() {
                       <button
                         className="btn btn-primary"
                         disabled={processingId === appt._id}
-                        onClick={() => setCompleteAppt(appt)}
+                        onClick={() => { setCompleteForm({ notes: "", prescription: "" }); setCompleteAppt(appt); }}
                       >
                         Complete Visit
                       </button>

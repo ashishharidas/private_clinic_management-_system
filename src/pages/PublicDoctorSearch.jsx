@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useState, useEffect } from "react";
 import api from "../api/client";
 
@@ -36,7 +37,7 @@ export default function PublicDoctorSearch() {
     setSearchParams({ query: "", specialty: "" });
   }
 
-  if (loading) return <div className="spinner" style={{ marginTop: 24 }} />;
+  
 
   return (
     <div>
@@ -113,7 +114,6 @@ export default function PublicDoctorSearch() {
   );
 }
 
-import { Link } from "react-router-dom";
 
 const styles = {
   searchRow: {

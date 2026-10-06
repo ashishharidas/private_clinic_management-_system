@@ -1,7 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import Login from "./pages/Login";
-import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import PublicDoctorDetail from "./pages/PublicDoctorDetail";
 import PublicDoctorSearch from "./pages/PublicDoctorSearch";
@@ -18,10 +17,11 @@ import DoctorShell from "./components/layout/DoctorShell";
 import PatientShell from "./components/layout/PatientShell";
 import StaffShell from "./components/layout/StaffShell";
 
-function Protected({ children }) {
+function Protected({ children, role }) {
   const { user, loading } = useAuth();
   if (loading) return <div>Loading...</div>;
   if (!user) return <Navigate to="/login" replace />;
+  if (role && user.role !== role) { return <Navigate to="/login" replace />; }
   return children;
 }
 
@@ -41,7 +41,6 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
       
       {/* Change Password - No role-specific shell since anyone can trigger it */}
       <Route path="/change-password" element={
@@ -55,15 +54,15 @@ export default function App() {
         <Route path="/public/doctors/:slug" element={<PublicDoctorDetail />} />
         
         {/* Protected Patient Routes */}
-        <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
-        <Route path="/doctors/:doctorId" element={<Protected><DoctorSlots /></Protected>} />
-        <Route path="/appointments" element={<Protected><MyAppointments /></Protected>} />
-        <Route path="/profile" element={<Protected><PatientProfile /></Protected>} />
+        <Route path="/dashboard" element={<Protected role="patient"><Dashboard /></Protected>} />
+        <Route path="/doctors/:doctorId" element={<Protected role="patient"><DoctorSlots /></Protected>} />
+        <Route path="/appointments" element={<Protected role="patient"><MyAppointments /></Protected>} />
+        <Route path="/profile" element={<Protected role="patient"><PatientProfile /></Protected>} />
       </Route>
 
       {/* Doctor Portal */}
       <Route element={<DoctorShell />}>
-        <Route path="/doctor/dashboard" element={<Protected><DoctorDashboard /></Protected>} />
+        <Route path="/doctor/dashboard" element={<Protected role="patient"><DoctorDashboard /></Protected>} />
       </Route>
 
       {/* Admin Portal */}
@@ -73,7 +72,7 @@ export default function App() {
       
       {/* Staff Portal */}
       <Route element={<StaffShell />}>
-        <Route path="/staff" element={<Protected><StaffDashboard /></Protected>} />
+        <Route path="/staff" element={<Protected role="patient"><StaffDashboard /></Protected>} />
       </Route>
 
       {/* Dynamic Catch-All Redirect based on role */}
