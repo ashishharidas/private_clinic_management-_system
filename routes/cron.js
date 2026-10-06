@@ -16,7 +16,7 @@ function checkSecret(req) {
 // GET /api/cron/generate-slots
 // Regenerates the 7-day rolling slot window for every active doctor.
 // Idempotent — the unique index on Slot prevents duplicates.
-router.get("/cron/generate-slots", async (req, res) => {
+router.get("/generate-slots", async (req, res) => {
   if (!checkSecret(req)) {
     return res.status(401).json({ message: "Unauthorized" });
   }

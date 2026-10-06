@@ -21,6 +21,8 @@ passport.use(
             name: profile.displayName,
             email: profile.emails[0].value,
             photo: profile.photos?.[0]?.value,
+            role: "patient",
+            profileComplete: false,
           });
         }
 
@@ -32,11 +34,12 @@ passport.use(
   )
 );
 
-// These two functions manage what gets stored in the session cookie
+// Serialize: store the user's MongoDB _id in the session
 passport.serializeUser((user, done) => {
-  done(null, user.id); // only store the user's MongoDB _id in the session
+  done(null, user.id);
 });
 
+// Deserialize: look up the user from the session on each request
 passport.deserializeUser(async (id, done) => {
   try {
     const user = await User.findById(id);
