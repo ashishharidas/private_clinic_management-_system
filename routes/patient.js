@@ -2,14 +2,14 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const Appointment = require("../models/Appointment");
-const { ensureAuthenticated, requirePatient, requireOwnership } = require("../middleware/auth");
+const { ensureAuthenticated, requirePermission, requireOwnership } = require("../middleware/auth");
 const { logAudit } = require("../utils/audit");
 
 // All routes in this file require an authenticated patient
 
 // ---- GET /api/patient/profile ----
 // Returns the current user's profile (excluding passwordHash)
-router.get("/profile", ensureAuthenticated, requirePatient, async (req, res) => {
+router.get("/profile", ensureAuthenticated, requirePermission("patient:read-profile"), async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select("-passwordHash").lean();
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -22,7 +22,7 @@ router.get("/profile", ensureAuthenticated, requirePatient, async (req, res) => 
 
 // ---- PUT /api/patient/profile ----
 // Updates patient profile fields
-router.put("/profile", ensureAuthenticated, requirePatient, async (req, res) => {
+router.put("/profile", ensureAuthenticated, requirePermission("patient:read-profile"), async (req, res) => {
   try {
     const {
       name,
@@ -103,7 +103,7 @@ router.put("/profile", ensureAuthenticated, requirePatient, async (req, res) => 
 
 // ---- GET /api/patient/appointments ----
 // Returns upcoming and past appointments for the current patient
-router.get("/appointments", ensureAuthenticated, requirePatient, async (req, res) => {
+router.get("/appointments", ensureAuthenticated, requirePermission("patient:read-profile"), async (req, res) => {
   try {
     const { status } = req.query; // "upcoming" | "history" | undefined = all
 

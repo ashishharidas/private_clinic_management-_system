@@ -4,7 +4,8 @@ const Appointment = require("../models/Appointment");
 const Doctor = require("../models/Doctor");
 const User = require("../models/User");
 const AuditLog = require("../models/AuditLog");
-const { ensureAuthenticated, ensureStaffOrHigher, requirePermission } = require("../middleware/auth");
+const { ensureAuthenticated, requirePermission } = require("../middleware/auth");
+const ensureStaffOrHigher = requirePermission("staff:read-appointments");
 
 // All routes here require staff, manager, or admin role
 
