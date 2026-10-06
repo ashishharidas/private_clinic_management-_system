@@ -30,7 +30,7 @@ export default function DoctorShell() {
         </div>
         <div style={styles.userSection}>
           <span style={styles.userName}>{user?.name}</span>
-          <button onClick={logout} style={styles.logoutBtn}>Logout</button>
+          <button onClick={async () => { await logout(); window.location.href="/login"; }} style={styles.logoutBtn}>Logout</button>
         </div>
       </nav>
       <main style={styles.main}>
