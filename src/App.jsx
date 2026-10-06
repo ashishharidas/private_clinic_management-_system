@@ -21,7 +21,7 @@ function Protected({ children, role }) {
   const { user, loading } = useAuth();
   if (loading) return <div>Loading...</div>;
   if (!user) return <Navigate to="/login" replace />;
-  if (role && user.role !== role) { return <Navigate to="/login" replace />; }
+  if (role === "staff" && (user.role === "manager" || user.role === "admin" || user.role === "staff")) {} else if (role && user.role !== role) { return <Navigate to="/login" replace />; }
   return children;
 }
 
@@ -62,7 +62,7 @@ export default function App() {
 
       {/* Doctor Portal */}
       <Route element={<DoctorShell />}>
-        <Route path="/doctor/dashboard" element={<Protected role="patient"><DoctorDashboard /></Protected>} />
+        <Route path="/doctor/dashboard" element={<Protected role="doctor"><DoctorDashboard /></Protected>} />
       </Route>
 
       {/* Admin Portal */}
@@ -72,7 +72,7 @@ export default function App() {
       
       {/* Staff Portal */}
       <Route element={<StaffShell />}>
-        <Route path="/staff" element={<Protected role="patient"><StaffDashboard /></Protected>} />
+        <Route path="/staff" element={<Protected role="staff"><StaffDashboard /></Protected>} />
       </Route>
 
       {/* Dynamic Catch-All Redirect based on role */}
